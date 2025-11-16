@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cindy's Kitchen - Order Menu</title>
+    <style>
+        :root {
+            --pink-light: #fce4ec;
+            --pink-medium: #f8bbd0;
+            --pink-dark: #f06292;
+            --white: #ffffff;
+            --black: #333333;
+        }
+
+        /* Perbaikan UI/UX: Menerapkan box-sizing secara universal */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--pink-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            position: relative;
+            padding: 30px;
+        }
+
+        .hello-kitty-pattern-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-image: url('bgcindy.jpg');
+            background-size: auto;
+            background-repeat: repeat;
+        }
+
+        .curtain-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .curtain {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background-color: var(--red-heart);
+            box-shadow: inset -5px 0 10px rgba(0,0,0,0.2);
+            animation: curtainWave 10s ease-in-out infinite alternate;
+        }
+        .curtain.left { left: 0; }
+        .curtain.right {
+            right: 0;
+            box-shadow: inset 5px 0 10px rgba(0,0,0,0.2);
+        }
+
+        @keyframes curtainWave {
+            0% { transform: perspective(1000px) rotateY(0deg); }
+            50% { transform: perspective(1000px) rotateY(1deg); }
+            100% { transform: perspective(1000px) rotateY(0deg); }
+        }
+
+        .content-area {
+            position: relative;
+            z-index: 20;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 30px 40px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 900px;
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "garlic fusili"
+                "texture topping"
+                "delivery delivery" /* BARU DITAMBAHKAN */
+                "buyername buyername"
+                "total total"
+                "addtocart addtocart";
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 30px;
+            border: 5px solid var(--pink-dark);
+            box-sizing: border-box;
+            margin-bottom: 30px;
+        }
+
+        .header-title {
+            grid-area: header;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            font-size: 3em;
+            color: var(--red-heart);
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px var(--pink-light);
+        }
+
+        .menu-card {
+            background-color: var(--pink-light);
+            border-radius: 20px;
+            padding: 15px;
+            border: 3px dashed var(--pink-dark);
+        }
+
+        .menu-card h3 {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            color: var(--red-heart);
+            font-size: 1.7em;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            background-color: var(--white);
+            padding: 8px 12px;
+            border-radius: 15px;
+            border: 1px solid var(--pink-medium);
+        }
+        .item-row.centered { justify-content: center; }
+
+        .item-row img { height: 60px; width: auto; object-fit: contain; }
+        .garlic-bread-section img { width: 100px; height: 100px; object-fit: contain; }
+
+        .fusili-section img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        .fusili-item-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 45%;
+            text-align: center;
+            background-color: var(--white);
+            padding: 10px;
+            border-radius: 15px;
+            border: 1px solid var(--pink-medium);
+            box-sizing: border-box;
+        }
+        .fusili-item-container h4 {
+            margin: 5px 0;
+            color: var(--pink-dark);
+            font-size: 1.1em;
+        }
+        .fusili-item-container p {
+            margin: 0;
+            font-size: 1em;
+            color: var(--black);
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 40px;
+            padding: 5px;
+            border: 1px solid var(--pink-medium);
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1em;
+            margin-top: 5px;
+        }
+
+        .options-group { text-align: left; margin-top: 10px; }
+        .options-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: var(--pink-dark);
+            font-size: 1.1em;
+        }
+        .options-group input { margin-right: 8px; }
+        /* Style untuk opsi yang dinonaktifkan */
+        .options-group label.disabled {
+            color: #b0b0b0; /* Warna abu-abu untuk teks */
+            cursor: not-allowed;
+        }
+
+        .garlic-bread-section { grid-area: garlic; text-align: center; }
+        .fusili-section { grid-area: fusili; }
+        .texture-section { grid-area: texture; }
+        .topping-section { grid-area: topping; }
+        
+        /* BARU DITAMBAHKAN */
+        .delivery-section { grid-area: delivery; }
+
+        .buyer-name-section {
+            grid-area: buyername;
+            text-align: center;
+            margin-top: 15px;
+            background-color: var(--pink-light);
+            border-radius: 20px;
+            padding: 15px;
+            border: 3px dashed var(--pink-dark);
+        }
+        .buyer-name-section label {
+            font-size: 1.3em;
+            color: var(--pink-dark);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+        #buyer-name {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.2em;
+            padding: 8px;
+            border: 2px solid var(--pink-medium);
+            border-radius: 8px;
+            width: 70%;
+        }
+
+        .total-price-section {
+            grid-area: total;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #total-price-display {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            font-size: 2em;
+            color: var(--black);
+            background-color: var(--white);
+            border: 2px dashed var(--pink-dark);
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .add-to-cart-section {
+            grid-area: addtocart;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .add-to-cart-btn {
+            background-color: var(--red-heart);
+            color: var(--black);
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Styling untuk Kucing Bergerak */
+        .animated-cat {
+            position: fixed;
+            top: 20px; /* Posisi di pojok kiri atas */
+            left: 20px;
+            width: 100px; /* Ukuran kucing */
+            height: auto;
+            z-index: 100; /* Pastikan di atas elemen lain */
+            animation: bounce 2s infinite alternate ease-in-out; /* Animasi */
+            pointer-events: none; /* Agar tidak mengganggu klik di belakangnya */
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); } /* Bergerak naik 15px */
+            100% { transform: translateY(0); }
+        }
+
+        /* =============================================
+        REVISI UI/UX MOBILE - MEDIA QUERY
+        =============================================
+        */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                -webkit-text-size-adjust: 100%;
+            }
+
+            .header, .header-title {
+                font-size: 2.2em;
+                margin-bottom: 20px;
+            }
+
+            .content-area {
+                grid-template-areas:
+                    "header" "garlic" "fusili" "texture" "topping"
+                    "delivery" /* BARU DITAMBAHKAN */
+                    "buyername" "total" "addtocart";
+                grid-template-columns: 1fr;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .fusili-section > div[style*="display: flex"] {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .fusili-item-container {
+                width: 90%;
+            }
+
+            #buyer-name {
+                width: 100%;
+            }
+
+            .add-to-cart-btn {
+                font-size: 1.3em;
+            }
+
+            /* Ukuran kucing di mobile */
+            .animated-cat {
+                width: 80px; /* Kecilkan sedikit di mobile */
+                top: 10px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hello-kitty-pattern-bg"></div>
+
+    <div class="curtain-container">
+        <div class="curtain left"></div>
+        <div class="curtain right"></div>
+    </div>
+
+    <img src="meong.png" alt="Animated Cat" class="animated-cat">
+
+    <div class="content-area">
+        <h1 class="header-title">猪 PRICE LIST MENU</h1>
+
+        <div class="menu-card garlic-bread-section">
+            <h3>🍞込 Garlic bread & Chili sauce</h3>
+            <div class="item-row centered">
+                <img src="rotisambal.jpg" alt="Garlic Bread & Chili Sauce">
+            </div>
+            <p style="font-size: 1.1em; font-weight: bold; margin-top: 10px;">Rp 10.000</p>
+            <input type="number" value="0" min="0" data-item-id="garlic_bread" data-price="10000" data-name="Garlic Bread & Chili Sauce" oninput="updateTotal(); toggleTextureOptions();">
+        </div>
+
+        <div class="menu-card fusili-section">
+            <h3>佐 Schotelicius Fusili</h3>
+            <div style="display: flex; gap: 10px; width: 100%; justify-content: space-around;">
+                <div class="fusili-item-container">
+                    <img src="500.jpg" alt="Schotelicius Fusili 500ml">
+                    <h4>500 ml</h4>
+                    <p>Rp 25.000</p>
+                    <input type="number" value="0" min="0" data-item-id="fusili_500" data-price="25000" data-name="Schotelicius Fusili 500ml" oninput="updateTotal(); toggleTextureOptions();">
+                </div>
+                <div class="fusili-item-container">
+                    <img src="300ml.jpg" alt="Schotelicius Fusili 300ml">
+                    <h4>300 ml</h4>
+                    <p>Rp 15.000</p>
+                    <input type="number" value="0" min="0" data-item-id="fusili_300" data-price="15000" data-name="Schotelicius Fusili 300ml" oninput="updateTotal(); toggleTextureOptions();">
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-card texture-section">
+            <h3>Preferred Texture</h3>
+            <div class="options-group" id="texture-options">
+                <label>
+                    <input type="radio" name="texture" value="Creamy cheese schotelicius" checked>
+                    Creamy cheese schotelicius
+                </label>
+                <label>
+                    <input type="radio" name="texture" value="Reguler cheese schotelicius">
+                    Reguler cheese schotelicius
+                </label>
+            </div>
+        </div>
+
+        <div class="menu-card topping-section">
+            <h3>Extra Topping</h3>
+            <div class="options-group">
+                <label>
+                    <input type="checkbox" data-topping-id="cheese" data-price="3000" data-name="Cheese" onchange="updateTotal()">
+                    Cheese: Rp 3.000
+                </label>
+                <label>
+                    <input type="checkbox" data-topping-id="sausage" data-price="5000" data-name="Sausage" onchange="updateTotal()">
+                    Sausage: Rp 5.000
+                </label>
+                <label>
+                    <input type="checkbox" data-topping-id="chili_sauce" data-price="2000" data-name="Chili Sauce" onchange="updateTotal()">
+                    Chili Sauce: Rp 2.000
+                </label>
+            </div>
+        </div>
+
+        <div class="menu-card delivery-section">
+            <h3>Delivery Option</h3>
+            <div class="options-group">
+                <label>
+                    <input type="radio" name="delivery_option" value="pickup" data-price="0" onchange="updateTotal()" checked>
+                    Self Pickup (Ambil Sendiri)
+                </label>
+                <label>
+                    <input type="radio" name="delivery_option" value="delivery" data-price="3500" onchange="updateTotal()">
+                    Delivery (Di Antar) - Rp 3.500
+                </label>
+            </div>
+        </div>
+        <div class="buyer-name-section">
+            <label for="buyer-name">Nama Anda:</label>
+            <input type="text" id="buyer-name" placeholder="Tulis nama di sini...">
+        </div>
+
+        <div class="total-price-section">
+            <h2 id="total-price-display">Total: Rp 0</h2>
+        </div>
+
+        <div class="add-to-cart-section">
+            <button class="add-to-cart-btn" onclick="sendToWhatsApp()">🍞猪 Pesan Sekarang</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Memperbarui total harga yang ditampilkan di layar.
+         */
+        function updateTotal() {
+            let total = 0;
+
+            // Hitung total dari item utama (Garlic Bread, Fusili)
+            document.querySelectorAll('input[type="number"][data-item-id]').forEach(input => {
+                const quantity = parseInt(input.value) || 0;
+                const price = parseInt(input.dataset.price) || 0;
+                total += quantity * price;
+            });
+
+            // Hitung total dari extra topping
+            document.querySelectorAll('input[type="checkbox"][data-topping-id]:checked').forEach(input => {
+                total += parseInt(input.dataset.price) || 0;
+            });
+
+            // --- BARU DITAMBAHKAN (Hitung biaya delivery) ---
+            const selectedDelivery = document.querySelector('input[name="delivery_option"]:checked');
+            if (selectedDelivery) {
+                total += parseInt(selectedDelivery.dataset.price) || 0;
+            }
+            // --- AKHIR BAGIAN BARU ---
+
+            // Tampilkan harga dengan format Rupiah
+            document.getElementById('total-price-display').innerText = `Total: Rp ${total.toLocaleString('id-ID')}`;
+        }
+
+        /**
+         * Mengaktifkan atau menonaktifkan opsi tekstur berdasarkan jumlah pesanan Fusili.
+         */
+        function toggleTextureOptions() {
+            const fusili500Qty = parseInt(document.querySelector('input[data-item-id="fusili_500"]').value) || 0;
+            const fusili300Qty = parseInt(document.querySelector('input[data-item-id="fusili_300"]').value) || 0;
+            const hasFusili = (fusili500Qty + fusili300Qty) > 0;
+
+            const textureRadios = document.querySelectorAll('#texture-options input[type="radio"]');
+            const textureLabels = document.querySelectorAll('#texture-options label');
+
+            if (hasFusili) {
+                textureRadios.forEach(radio => {
+                    radio.disabled = false;
+                });
+                textureLabels.forEach(label => {
+                    label.classList.remove('disabled');
+                });
+            } else {
+                textureRadios.forEach(radio => {
+                    radio.disabled = true;
+                    radio.checked = false; // Hapus pilihan jika dinonaktifkan
+                });
+                // Set default pilihan pertama (jika ada) saat dinonaktifkan, tapi tetap disabled
+                if (textureRadios.length > 0) {
+                    textureRadios[0].checked = true;
+                }
+                textureLabels.forEach(label => {
+                    label.classList.add('disabled');
+                });
+            }
+        }
+
+        /**
+         * Mengumpulkan pesanan dan mengirimkannya ke WhatsApp.
+         */
+        function sendToWhatsApp() {
+            const buyerName = document.getElementById('buyer-name').value;
+            // Validasi nama pembeli
+            if (!buyerName.trim()) {
+                alert("Harap masukkan nama Anda!");
+                document.getElementById('buyer-name').focus();
+                return;
+            }
+
+            const waNumber = "6281318635796";
+            let messageLines = [];
+            let totalOrderPrice = 0;
+            let hasItems = false; // Cek apakah ada barang yang dipesan
+            let fusiliOrdered = false; // Cek apakah fusili dipesan
+
+            // %0A adalah kode untuk baris baru (Enter) di URL
+            messageLines.push("Assalamualaikum Cindy, saya mau pesan:");
+            messageLines.push(""); // Baris kosong
+            messageLines.push(`*Nama Pemesan:* ${buyerName}`);
+            messageLines.push(""); // Baris kosong
+            messageLines.push("*Pesanan:*");
+
+            // Kumpulkan item utama
+            document.querySelectorAll('input[type="number"][data-item-id]').forEach(input => {
+                const quantity = parseInt(input.value);
+                if (quantity > 0) {
+                    hasItems = true;
+                    const price = parseInt(input.dataset.price);
+                    const name = input.dataset.name;
+                    const itemTotal = quantity * price;
+
+                    messageLines.push(`- ${name} (${quantity}x) - Rp ${itemTotal.toLocaleString('id-ID')}`);
+                    totalOrderPrice += itemTotal;
+
+                    // Cek jika fusili dipesan
+                    if (name.includes("Fusili")) {
+                        fusiliOrdered = true;
+                    }
+                }
+            });
+
+            // Jika tidak ada item utama, hentikan fungsi
+            if (!hasItems) {
+                alert("Anda belum memilih item apapun!");
+                return;
+            }
+
+            // Tambahkan tekstur hanya jika fusili dipesan
+            if (fusiliOrdered) {
+                const texture = document.querySelector('input[name="texture"]:checked');
+                if (texture && !texture.disabled) { // Pastikan tekstur tidak dinonaktifkan
+                    messageLines.push(""); // Baris kosong
+                    messageLines.push(`*Texture:* ${texture.value}`);
+                }
+            }
+
+
+            // Kumpulkan extra topping
+            const toppings = document.querySelectorAll('input[type="checkbox"][data-topping-id]:checked');
+            if (toppings.length > 0) {
+                messageLines.push(""); // Baris kosong
+                messageLines.push("*Extra Topping:*");
+                toppings.forEach(input => {
+                    const price = parseInt(input.dataset.price);
+                    const name = input.dataset.name;
+
+                    messageLines.push(`- ${name} - Rp ${price.toLocaleString('id-ID')}`);
+                    totalOrderPrice += price;
+                });
+            }
+
+            // --- BARU DITAMBAHKAN (Kumpulkan Opsi Delivery) ---
+            const deliveryOption = document.querySelector('input[name="delivery_option"]:checked');
+            if (deliveryOption) {
+                const price = parseInt(deliveryOption.dataset.price);
+                let deliveryText = "";
+
+                if (deliveryOption.value === 'pickup') {
+                    deliveryText = "Self Pickup (Ambil Sendiri)";
+                } else if (deliveryOption.value === 'delivery') {
+                    deliveryText = `Delivery (Di Antar) - Rp ${price.toLocaleString('id-ID')}`;
+                }
+                
+                messageLines.push(""); // Baris kosong
+                messageLines.push("*Delivery:*");
+                messageLines.push(`- ${deliveryText}`);
+                
+                // Tambahkan harga delivery ke total harga di WA
+                totalOrderPrice += price; 
+            }
+            // --- AKHIR BAGIAN BARU ---
+
+
+            // Tambahkan total harga
+            messageLines.push(""); // Baris kosong
+            messageLines.push(`*Total Harga: Rp ${totalOrderPrice.toLocaleString('id-ID')}*`);
+
+            // Gabungkan semua baris pesan menjadi satu string
+            const waMessage = encodeURIComponent(messageLines.join('\n'));
+
+            // Buat URL WhatsApp
+            const waURL = `https://wa.me/${waNumber}?text=${waMessage}`;
+
+            // Buka WhatsApp di tab baru
+            window.open(waURL, '_blank');
+
+            // Reset form setelah berhasil
+            resetForm();
+        }
+
+        /**
+         * Mengatur ulang form ke kondisi awal
+         */
+        function resetForm() {
+            // Reset jumlah item
+            document.querySelectorAll('input[type="number"]').forEach(input => input.value = 0);
+            // Reset checklist topping
+            document.querySelectorAll('input[type="checkbox"]').forEach(input => input.checked = false);
+            // Reset pilihan texture dan nonaktifkan jika tidak ada fusili
+            document.querySelector('input[name="texture"][value="Creamy cheese schotelicius"]').checked = true;
+            toggleTextureOptions(); // Panggil ini untuk memastikan state disabled yang benar
+
+            // --- BARU DITAMBAHKAN (Reset pilihan delivery) ---
+            document.querySelector('input[name="delivery_option"][value="pickup"]').checked = true;
+            // --- AKHIR BAGIAN BARU ---
+
+            // Kosongkan nama pembeli
+            document.getElementById('buyer-name').value = '';
+
+            // Perbarui total harga di display jadi Rp 0
+            updateTotal();
+        }
+
+        // --- Inisialisasi Halaman (Onload) ---
+        window.onload = () => {
+            updateTotal();
+            toggleTextureOptions(); // Panggil saat halaman dimuat untuk setel state awal
+        };
+    </script>
+</body>
+</html>
